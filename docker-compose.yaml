@@ -17,5 +17,17 @@ services:
     volumes:
       - timescale_data:/var/lib/postgresql
 
+  consumer:
+    container_name: consumer
+    build:
+      context: .
+      dockerfile: src_pipeline/dockerfiles/consumer.dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - mosquitto
+      - timescaledb
+
 volumes:
   timescale_data:
+  
