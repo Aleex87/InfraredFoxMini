@@ -1,0 +1,13 @@
+datasources:
+  - name: InfraredFox TimescaleDB
+    uid: infrafox-timescaledb
+    type: postgres
+    access: proxy
+    url: timescaledb:5432
+    user: ${POSTGRES_USER}
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    jsonData:
+      database: ${POSTGRES_DB}
+      sslmode: disable
+      postgresVersion: 1800
