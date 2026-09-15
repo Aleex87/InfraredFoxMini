@@ -6,7 +6,7 @@ InfraredFoxMini is an edge computing safety prototype for railway and metro plat
 
 The system uses two pairs of IR break-beam sensors:
 
-- first line = yellow warning zone
+- first line = warning zone
 - second line = danger zone
 
 The system uses LEDs and a buzzer for local warnings and sends data through the following pipeline:
@@ -44,7 +44,7 @@ Hardware assembly and Azure deployment are shared tasks.
 | MQTT broker | `mosquitto` |
 | MQTT port | `1883` |
 | Pico client ID | `pico` |
-| JSON zone values | `SAFE`, `YELLOW`, `DANGER` |
+| JSON zone values | `SAFE`, `WARNING`, `DANGER` |
 | Docker services | `mosquitto`, `consumer`, `timescaledb`, `grafana` |
 | TimescaleDB port | `5432` |
 | Grafana port | `3000` |
@@ -69,7 +69,7 @@ Hardware assembly and Azure deployment are shared tasks.
 
 SAFE -> green LED
 
-YELLOW -> yellow LED
+WARNING -> yellow LED
 
 DANGER -> red LED + buzzer
 
