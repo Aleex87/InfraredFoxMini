@@ -141,8 +141,8 @@
                           "color": "green",
                           "index": 0
                         },
-                        "YELLOW": {
-                          "text": "YELLOW",
+                        "WARNING": {
+                          "text": "WARNING",
                           "color": "yellow",
                           "index": 1
                         }
@@ -301,7 +301,7 @@
                         "editorMode": "code",
                         "format": "table",
                         "rawQuery": true,
-                        "rawSql": "SELECT COUNT(*)\r\nFROM safety_events \r\nWHERE zone = 'YELLOW'",
+                        "rawSql": "SELECT COUNT(*)\r\nFROM safety_events \r\nWHERE zone = 'WARNING'",
                         "sql": {
                           "columns": [
                             {
@@ -369,7 +369,7 @@
                   },
                   "color": {
                     "mode": "fixed",
-                    "fixedColor": "yellow"
+                    "fixedColor": "WARNING"
                   }
                 },
                 "overrides": []
@@ -574,8 +574,8 @@
                           "color": "green",
                           "index": 0
                         },
-                        "YELLOW": {
-                          "text": "YELLOW",
+                        "WARNING": {
+                          "text": "WARNING",
                           "color": "yellow",
                           "index": 1
                         }
