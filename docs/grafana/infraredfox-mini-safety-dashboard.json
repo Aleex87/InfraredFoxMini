@@ -63,7 +63,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "cfy7tv1oain7kb"
+                        "name": "infrafox-timescaledb"
                       },
                       "spec": {
                         "dataset": "infrafox",
@@ -191,7 +191,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "cfy7tv1oain7kb"
+                        "name": "infrafox-timescaledb"
                       },
                       "spec": {
                         "dataset": "infrafox",
@@ -294,7 +294,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "cfy7tv1oain7kb"
+                        "name": "infrafox-timescaledb"
                       },
                       "spec": {
                         "dataset": "infrafox",
@@ -397,7 +397,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "cfy7tv1oain7kb"
+                        "name": "infrafox-timescaledb"
                       },
                       "spec": {
                         "dataset": "infrafox",
@@ -501,7 +501,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "cfy7tv1oain7kb"
+                        "name": "infrafox-timescaledb"
                       },
                       "spec": {
                         "dataset": "infrafox",

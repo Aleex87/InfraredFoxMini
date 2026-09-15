@@ -1,13 +1,17 @@
+apiVersion: 1
+
 datasources:
   - name: InfraredFox TimescaleDB
     uid: infrafox-timescaledb
     type: postgres
     access: proxy
     url: timescaledb:5432
-    user: ${POSTGRES_USER}
+    user: sensor
     secureJsonData:
-      password: ${POSTGRES_PASSWORD}
+      password: alessandro
     jsonData:
-      database: ${POSTGRES_DB}
+      database: infrafox
       sslmode: disable
       postgresVersion: 1800
+      timescaledb: true
+      
