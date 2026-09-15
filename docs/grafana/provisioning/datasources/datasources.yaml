@@ -6,11 +6,11 @@ datasources:
     type: postgres
     access: proxy
     url: timescaledb:5432
-    user: sensor
+    user: ${POSTGRES_USER}
     secureJsonData:
-      password: alessandro
+      password: ${POSTGRES_PASSWORD}
     jsonData:
-      database: infrafox
+      database: ${POSTGRES_DB}
       sslmode: disable
       postgresVersion: 1800
       timescaledb: true
