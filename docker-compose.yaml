@@ -43,10 +43,16 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./docs/grafana/infraredfox-mini-safety-dashboard.json:/var/lib/grafana/dashboards/infraredfox-mini-safety-dashboard.json
+      - ./docs/grafana/provisioning/dashboard:/etc/grafana/provisioning/dashboards
+      - ./docs/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     depends_on:
-      - timescaledb # let start TimescaleDB before Garfana
+      - timescaledb # let the db start before.
 
 volumes:
   timescale_data:
