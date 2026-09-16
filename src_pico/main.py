@@ -1,5 +1,7 @@
 import time
 time.sleep(0.1) 
+from wifi import connect_wifi
+from mqtt import connecting_mqtt,publish_infraredfox_data
 
 from machine import Pin, PWM
 
@@ -29,14 +31,22 @@ starttime_warningzone = None
 zone_duration = 0
 
 # State of sensors 
+## This will read the state of the beam instead of assuming that its 1 
+previouswarning_state= IR_Warningsensor.value()
+previousDanger_state= IR_Dangersensor.value()
 
-previouswarning_state = 1  # 1 = beam is clear 0 = beam is broken !
-previousDanger_state = 1  
 
 
 # Direction of person/object : TOWARDS DANGER or TOWARDS SAFEZONE
 direction = None 
 
+connect_wifi()
+mqtt_client=connecting_mqtt()
+
+
+### In order for the program to remember what zone it was in the previous turn
+## And to compare if the zone has changed from SAFE to WARNING
+previous_zone= zone 
 
 while True: 
 
@@ -57,13 +67,15 @@ while True:
 
 
 # WARNING TO DANGER 
-    elif dangerzone_crossed and zone == "WARNING":
-        direction = "TOWARDS_DANGER"
+    elif (
+        zone == "WARNING"
+        and direction == "TOWARDS_DANGER"
+        and current_danger == 0
+    ):
         zone = "DANGER"
 
- 
   
-    # RETURNING LOGIC . Return to SAFE zone
+    # Returning to SAFE ZONE logic
     # DANGER -> WARNING
     elif dangerzone_crossed and zone == "DANGER":
         direction = "TOWARDS_SAFE"
@@ -86,6 +98,7 @@ while True:
  # zone controls LED buzzer timer 
     if zone == "DANGER":  # Danger must have highest priority
         object_in_zone = True 
+        buzzer.freq(1500)
         buzzer.duty_u16(5000) # buzzer activates 
         
         
@@ -101,6 +114,7 @@ while True:
 
     elif zone == "WARNING": # 2nd priority but still high risk area
         object_in_zone = True
+        buzzer.freq(700)
         buzzer.duty_u16(3000) # Lower sound
        
         if starttime_warningzone is None:
@@ -150,6 +164,15 @@ while True:
 
         starttime_warningzone = None 
 
+     # It only publishes when zone changes 
+    if zone != previous_zone:
+         publish_infraredfox_data(
+            mqtt_client,
+            zone,
+          zone_duration,
+            danger_duration
+            )
+         previous_zone = zone 
 
     # Saving sensor values for next loop
     previouswarning_state = current_warning
