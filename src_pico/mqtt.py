@@ -2,7 +2,7 @@
 from umqtt.simple import MQTTClient 
 import json 
 
-MQTT_BROKER = ##  # will fill in the  ip ""
+MQTT_BROKER = '192.168.0.93'
 MQTT_PORT=1883
 MQTT_CLIENT_ID= "pico"
 MQTT_TOPIC ="infraredfox/safety"
@@ -13,6 +13,10 @@ def connecting_mqtt():
         server= MQTT_BROKER,
         port = MQTT_PORT
     )
+    #tillfällig kod
+    print("Connecting to MQTT broker...")
+    client.connect()
+    print("MQTT connected")
     client.connect()
 
     return client 
@@ -31,5 +35,9 @@ def publish_infraredfox_data(client,zone, zone_duration, danger_duration):
         MQTT_TOPIC,
         message
                 )
+
+    # tillfällig testkod
+    client.publish(MQTT_TOPIC, message)
+    print("MQTT message published:", message)
 
    

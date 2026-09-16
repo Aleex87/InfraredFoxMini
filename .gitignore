@@ -230,3 +230,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# secrets
+src_pico/secrets.py
