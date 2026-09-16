@@ -1,16 +1,28 @@
+import time
 import os
 import psycopg2
 
 
 # Create connection to TimescaleDB
 def get_db_connection():
-    return psycopg2.connect(
-        host=os.getenv("DB_HOST", "timescaledb"),
-        port=5432,
-        dbname=os.getenv("POSTGRES_DB", "infrafox"),
-        user=os.getenv("POSTGRES_USER", "sensor"),
-        password=os.getenv("POSTGRES_PASSWORD"),
-    )
+    max_retries = 5
+    retry_delay = 3
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            return psycopg2.connect(
+                host=os.getenv("DB_HOST", "timescaledb"),
+                port=5432,
+                dbname=os.getenv("POSTGRES_DB", "infrafox"),
+                user=os.getenv("POSTGRES_USER", "sensor"),
+                password=os.getenv("POSTGRES_PASSWORD"),
+            )
+        except psycopg2.OperationalError:
+            # Stop retrying after the final failed attempt
+            if attempt == max_retries:
+                raise
+
+            time.sleep(retry_delay)
 
 
 # Create table for InfraredFox safety events
