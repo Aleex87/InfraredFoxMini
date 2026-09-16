@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: InfraredFoxMini
+    orgId: 1
+    folder: InfraredFoxMini
+    type: file
+    updateIntervalSeconds: 10
+    options:
+      path: /var/lib/grafana/dashboards
+      
