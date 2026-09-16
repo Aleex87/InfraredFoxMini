@@ -4,6 +4,7 @@ from wifi import connect_wifi
 from mqtt import connecting_mqtt,publish_infraredfox_data
 
 from machine import Pin, PWM
+from display import show_ready, show_train_warning, button_pressed
 
 # Sensors
 IR_Warningsensor = Pin(2, Pin.IN, Pin.PULL_UP)
@@ -17,7 +18,7 @@ red_led = Pin(11, Pin.OUT)
 zone = "SAFE" # Default mode 
 object_in_zone = False
 
-# Buzzer *LLM USAGE*.In the following part i took assistance from LLM.
+# LLM USAGE*.In the following part i took assistance from LLM for the PWM buzzer setup
 buzzer = PWM(Pin(5))
 buzzer.freq(1000)
 buzzer.duty_u16(0)
@@ -32,6 +33,7 @@ zone_duration = 0
 
 # State of sensors 
 ## This will read the state of the beam instead of assuming that its 1 
+# LLM USAGE: since i had a problem with the buzzer LLM assisted me to change the logic for the sensor
 previouswarning_state= IR_Warningsensor.value()
 previousDanger_state= IR_Dangersensor.value()
 
@@ -43,11 +45,13 @@ direction = None
 connect_wifi()
 mqtt_client=connecting_mqtt()
 
+show_ready() # Shows that the "System is ready"
 
 ### In order for the program to remember what zone it was in the previous turn
 ## And to compare if the zone has changed from SAFE to WARNING
 previous_zone= zone 
 
+train_detection_active = False # tracks if lcd is currently displayed 
 while True: 
 
     # Reading sensor states 
@@ -58,7 +62,14 @@ while True:
     # Only when beam changes from 1 clear to 0 broken 
     warningzone_crossed = previouswarning_state == 1 and current_warning == 0
     dangerzone_crossed = previousDanger_state == 1 and current_danger == 0
+    if button_pressed() and not train_detection_active:
+        show_train_warning()
+        train_detection_active = True 
 
+    elif not button_pressed() and train_detection_active:
+        show_ready()
+        train_detection_active= False 
+    
 
 # SAFE TO WARNING 
     if warningzone_crossed and zone == "SAFE":
@@ -87,7 +98,7 @@ while True:
          direction = None 
          
     
-# Check if beam is broken
+# Logs when sensor beam is crossed 
 
     if previouswarning_state == 1 and current_warning == 0:
         print("Warning sensor crossed !")
@@ -95,7 +106,7 @@ while True:
     if previousDanger_state == 1 and current_danger == 0:
         print("Danger sensor crossed!")
 
- # zone controls LED buzzer timer 
+ # zone controls LEDs buzzer timer 
     if zone == "DANGER":  # Danger must have highest priority
         object_in_zone = True 
         buzzer.freq(1500)
