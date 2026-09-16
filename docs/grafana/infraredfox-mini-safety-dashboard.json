@@ -369,7 +369,7 @@
                   },
                   "color": {
                     "mode": "fixed",
-                    "fixedColor": "WARNING"
+                    "fixedColor": "yellow"
                   }
                 },
                 "overrides": []
