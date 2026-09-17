@@ -1,5 +1,7 @@
 # InfraredFoxMini
 
+![InfraredFoxMini hardware](docs/immages/immage_station.png)
+
 InfraredFoxMini is an edge computing prototype for detecting and monitoring objects entering railway risk zones.
 
 The system uses a Raspberry Pi Pico 2 W with infrared sensors to detect movement between SAFE, WARNING and DANGER zones. The Pico publishes zone changes through MQTT to a containerized backend, where events are stored in TimescaleDB and visualized in Grafana.
@@ -68,7 +70,8 @@ Example payload:
   "zone": "WARNING",
   "zone_duration": 2.4,
   "danger_duration": 0
-}
+} 
+```
 
 Consumer recive the message and store the data in TimescaleDB.
 This steps need for fether anlaisis like:
