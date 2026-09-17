@@ -1,7 +1,10 @@
 import time
 time.sleep(0.1) 
+from wifi import connect_wifi
+from mqtt import connecting_mqtt,publish_infraredfox_data
 
 from machine import Pin, PWM
+from display import show_ready, show_train_warning, button_pressed
 
 # Sensors
 IR_Warningsensor = Pin(2, Pin.IN, Pin.PULL_UP)
@@ -15,7 +18,7 @@ red_led = Pin(11, Pin.OUT)
 zone = "SAFE" # Default mode 
 object_in_zone = False
 
-# Buzzer *LLM USAGE*.In the following part i took assistance from LLM.
+# LLM USAGE*.In the following part i took assistance from LLM for the PWM buzzer setup
 buzzer = PWM(Pin(5))
 buzzer.freq(1000)
 buzzer.duty_u16(0)
@@ -29,15 +32,26 @@ starttime_warningzone = None
 zone_duration = 0
 
 # State of sensors 
+## This will read the state of the beam instead of assuming that its 1 
+# LLM USAGE: since i had a problem with the buzzer LLM assisted me to change the logic for the sensor
+previouswarning_state= IR_Warningsensor.value()
+previousDanger_state= IR_Dangersensor.value()
 
-previouswarning_state = 1  # 1 = beam is clear 0 = beam is broken !
-previousDanger_state = 1  
 
 
 # Direction of person/object : TOWARDS DANGER or TOWARDS SAFEZONE
 direction = None 
 
+connect_wifi()
+mqtt_client=connecting_mqtt()
 
+show_ready() # Shows that the "System is ready"
+
+### In order for the program to remember what zone it was in the previous turn
+## And to compare if the zone has changed from SAFE to WARNING
+previous_zone= zone 
+
+train_detection_active = False # tracks if lcd is currently displayed 
 while True: 
 
     # Reading sensor states 
@@ -48,7 +62,14 @@ while True:
     # Only when beam changes from 1 clear to 0 broken 
     warningzone_crossed = previouswarning_state == 1 and current_warning == 0
     dangerzone_crossed = previousDanger_state == 1 and current_danger == 0
+    if button_pressed() and not train_detection_active:
+        show_train_warning()
+        train_detection_active = True 
 
+    elif not button_pressed() and train_detection_active:
+        show_ready()
+        train_detection_active= False 
+    
 
 # SAFE TO WARNING 
     if warningzone_crossed and zone == "SAFE":
@@ -57,13 +78,15 @@ while True:
 
 
 # WARNING TO DANGER 
-    elif dangerzone_crossed and zone == "WARNING":
-        direction = "TOWARDS_DANGER"
+    elif (
+        zone == "WARNING"
+        and direction == "TOWARDS_DANGER"
+        and current_danger == 0
+    ):
         zone = "DANGER"
 
- 
   
-    # RETURNING LOGIC . Return to SAFE zone
+    # Returning to SAFE ZONE logic
     # DANGER -> WARNING
     elif dangerzone_crossed and zone == "DANGER":
         direction = "TOWARDS_SAFE"
@@ -75,7 +98,7 @@ while True:
          direction = None 
          
     
-# Check if beam is broken
+# Logs when sensor beam is crossed 
 
     if previouswarning_state == 1 and current_warning == 0:
         print("Warning sensor crossed !")
@@ -83,9 +106,10 @@ while True:
     if previousDanger_state == 1 and current_danger == 0:
         print("Danger sensor crossed!")
 
- # zone controls LED buzzer timer 
+ # zone controls LEDs buzzer timer 
     if zone == "DANGER":  # Danger must have highest priority
         object_in_zone = True 
+        buzzer.freq(1500)
         buzzer.duty_u16(5000) # buzzer activates 
         
         
@@ -101,6 +125,7 @@ while True:
 
     elif zone == "WARNING": # 2nd priority but still high risk area
         object_in_zone = True
+        buzzer.freq(700)
         buzzer.duty_u16(3000) # Lower sound
        
         if starttime_warningzone is None:
@@ -150,6 +175,15 @@ while True:
 
         starttime_warningzone = None 
 
+     # It only publishes when zone changes 
+    if zone != previous_zone:
+         publish_infraredfox_data(
+            mqtt_client,
+            zone,
+          zone_duration,
+            danger_duration
+            )
+         previous_zone = zone 
 
     # Saving sensor values for next loop
     previouswarning_state = current_warning
