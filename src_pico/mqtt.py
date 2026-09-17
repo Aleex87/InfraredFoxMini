@@ -13,12 +13,9 @@ def connecting_mqtt():
         server= MQTT_BROKER,
         port = MQTT_PORT
     )
-    #tillfällig kod
+    
     print("Connecting to MQTT broker...")
     client.connect()
-    print("MQTT connected")
-    client.connect()
-
     return client 
 
 def publish_infraredfox_data(client,zone, zone_duration, danger_duration):
@@ -36,8 +33,5 @@ def publish_infraredfox_data(client,zone, zone_duration, danger_duration):
         message
                 )
 
-    # tillfällig testkod
-    client.publish(MQTT_TOPIC, message)
-    print("MQTT message published:", message)
-
+  
    
