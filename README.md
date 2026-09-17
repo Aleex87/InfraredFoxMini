@@ -92,3 +92,9 @@ Has been used for:
 - Grafana
 And for a easy deployment.
 
+
+## Authors 
+
+Alessandro
+Mona
+Mairan
