@@ -129,6 +129,8 @@ while True:
 
         # SAFE -> WARNING
         if current_zone == "SAFE":
+            warning_duration = 0
+            danger_duration = 0
             current_zone = "WARNING"
 
             set_zone(current_zone)
