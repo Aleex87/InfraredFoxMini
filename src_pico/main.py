@@ -4,7 +4,6 @@ from wifi import connect_wifi
 from mqtt import connecting_mqtt, publish_infraredfox_data
 from display import show_ready, show_train_warning, button_pressed
 
-
 # Wifi and MQTT
 print("Connecting to Wifi please wait..")
 connect_wifi()
@@ -45,6 +44,7 @@ warning_duration = 0  # Changed name into warning for clarity
 
 
 # Functions for BUZZER, ZONE CONTROL and MQTT publishing
+
 
 def alarm(freq, duration, duty):  # LLM USAGE *
     buzzer.freq(freq)
@@ -93,12 +93,7 @@ def set_zone(zone):
 def publish_zone(zone, warning_duration=0, danger_duration=0):
     print("Publishing:", zone)
 
-    publish_infraredfox_data(
-        mqtt_client,
-        zone,
-        warning_duration,
-        danger_duration
-    )
+    publish_infraredfox_data(mqtt_client, zone, warning_duration, danger_duration)
 
 
 ## Button control
@@ -123,7 +118,6 @@ while True:
         show_ready()
         train_detection_active = False
 
-
     # SAFE <-> WARNING
     if warningzone_button.value() == 0:
 
@@ -135,37 +129,24 @@ while True:
 
             set_zone(current_zone)
 
-            publish_zone(
-                current_zone,
-                warning_duration,
-                danger_duration
-            )
+            publish_zone(current_zone, warning_duration, danger_duration)
 
         # WARNING -> SAFE
         elif current_zone == "WARNING":
 
-            warning_duration = time.ticks_diff(
-                time.ticks_ms(),
-                starttime_warningzone
-            ) / 1000
+            warning_duration = (
+                time.ticks_diff(time.ticks_ms(), starttime_warningzone) / 1000
+            )
 
             starttime_warningzone = None
 
-            print(
-                "Time in WARNING:",
-                warning_duration,
-                "seconds"
-            )
+            print("Time in WARNING:", warning_duration, "seconds")
 
             current_zone = "SAFE"
 
             set_zone(current_zone)
 
-            publish_zone(
-                current_zone,
-                warning_duration,
-                danger_duration
-            )
+            publish_zone(current_zone, warning_duration, danger_duration)
 
         # Wait until button is released
         while warningzone_button.value() == 0:
@@ -173,67 +154,47 @@ while True:
 
         time.sleep(0.1)
 
-
     # WARNING <-> DANGER
     elif dangerzone_button.value() == 0:
 
         # WARNING -> DANGER
         if current_zone == "WARNING":
 
-            warning_duration = time.ticks_diff(
-                time.ticks_ms(),
-                starttime_warningzone
-            ) / 1000
+            warning_duration = (
+                time.ticks_diff(time.ticks_ms(), starttime_warningzone) / 1000
+            )
 
             starttime_warningzone = None
 
-            print(
-                "Time in WARNING:",
-                warning_duration,
-                "seconds"
-            )
+            print("Time in WARNING:", warning_duration, "seconds")
 
             current_zone = "DANGER"
 
             set_zone(current_zone)
 
-            publish_zone(
-                current_zone,
-                warning_duration,
-                danger_duration
-            )
+            publish_zone(current_zone, warning_duration, danger_duration)
 
         # DANGER -> WARNING
         elif current_zone == "DANGER":
 
-            danger_duration = time.ticks_diff(
-                time.ticks_ms(),
-                starttime_dangerzone
-            ) / 1000
+            danger_duration = (
+                time.ticks_diff(time.ticks_ms(), starttime_dangerzone) / 1000
+            )
 
             starttime_dangerzone = None
 
-            print(
-                "Time in DANGER:",
-                danger_duration,
-                "seconds"
-            )
+            print("Time in DANGER:", danger_duration, "seconds")
 
             current_zone = "WARNING"
 
             set_zone(current_zone)
 
-            publish_zone(
-                current_zone,
-                warning_duration,
-                danger_duration
-            )
+            publish_zone(current_zone, warning_duration, danger_duration)
 
         # Wait until button is released
         while dangerzone_button.value() == 0:
             time.sleep(0.05)
 
         time.sleep(0.1)
-
 
     time.sleep(0.05)
