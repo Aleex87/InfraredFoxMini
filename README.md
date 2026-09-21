@@ -10,6 +10,9 @@ The system uses a Raspberry Pi Pico 2 W with infrared sensors to detect movement
 
 The Raspberry Pi Pico must be connected to the same network as the MQTT broker during local testing.
 
+azure link: 
+http://68.210.186.123:3000/
+
 `docker compose up -d` 
 
 shuth down the docker 
@@ -17,6 +20,9 @@ shuth down the docker
 `docker compose down`
 
 ## Architecture
+
+![InfraredFoxMini hardware](docs/immages/workflow.png)
+
 
 Pico 2 W
 → MQTT / Mosquitto
@@ -45,6 +51,12 @@ Pico 2 W
 The buzzer and LEDs provide local warnings based on the current zone.
 
 ## LCD Display
+
+### Wokwi simulation
+
+The hardwere setup has been simulated in Wokwi
+
+![InfraredFoxMini hardware](docs/immages/wiring.png)
 
 The LCD provides local edge monitoring.
 
@@ -78,10 +90,6 @@ This steps need for fether anlaisis like:
  - when there are more danger event? 
  - in wich day?
  - in wich station  
-
-## Wokwi simulation
-
-The hardwere setup has been simulated in Wokwi
 
 ## Docker compose 
 
