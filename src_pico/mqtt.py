@@ -2,7 +2,7 @@
 from umqtt.simple import MQTTClient
 import json
 
-MQTT_BROKER = "172.20.10.3"
+MQTT_BROKER = "68.210.186.123"
 MQTT_PORT = 1883
 MQTT_CLIENT_ID = "pico"
 MQTT_TOPIC = "infraredfox/safety"
