@@ -13,6 +13,7 @@ def connecting_mqtt():
 
     print("Connecting to MQTT broker...")
     client.connect()
+    print("MQTT connected!")
     return client
 
 

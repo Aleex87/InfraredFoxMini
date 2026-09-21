@@ -233,3 +233,5 @@ Thumbs.db
 
 # secrets
 src_pico/secrets.py
+src_pico/wifi_credentials.json
+src_pico/.micropico
