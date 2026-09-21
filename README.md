@@ -69,6 +69,16 @@ When a train detection event is active:
 `ATTENTION!`
 `TRAIN ARRIVING`
 
+## Grafana
+
+![Grafana dashboard](docs/immages/dashboard.png)
+
+Grafana is used as the frontend of the system to visualize live data sent from the Pico.
+
+The dashboard is automatically configured through provisioning, so the same setup can be recreated consistently on different devices and after deployment.
+
+In the deployed version, Grafana provides the user interface for monitoring the live data stored in TimescaleDB.
+
 ## IoT Pipeline
 
 The Pico connects to Wi-Fi and publishes MQTT messages to:
