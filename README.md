@@ -58,6 +58,8 @@ The hardwere setup has been simulated in Wokwi
 
 ![InfraredFoxMini hardware](docs/immages/wiring.png)
 
+link: https://wokwi.com/projects/475231800493635585
+
 The LCD provides local edge monitoring.
 
 Default state:
