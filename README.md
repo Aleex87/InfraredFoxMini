@@ -15,7 +15,7 @@ The Azure resource group and VM were removed after the demo to avoid additional 
 
 `docker compose up -d` 
 
-shuth down the docker 
+shut down the docker 
 
 `docker compose down`
 
@@ -56,13 +56,14 @@ The buzzer and LEDs provide local warnings based on the current zone.
 
 ### Wokwi simulation
 
-The hardwere setup has been simulated in Wokwi
+The hardware setup has been simulated in Wokwi
 
 ![InfraredFoxMini hardware](docs/immages/wiring.png)
 
 link: https://wokwi.com/projects/475231800493635585
 
-The LCD provides local edge monitoring.
+The LCD was successfully tested in Wokwi but was not used in the physical demo because of an unreliable connection in the display module.
+
 
 Default state:
 
@@ -73,7 +74,7 @@ When a train detection event is active:
 `ATTENTION!`
 `TRAIN ARRIVING`
 
-The LCD functionality is implemented in the code and tested in Wokwi. In a real system it could be connected to a vibration sensor propper isoleted and installed near by the ralway.
+The LCD functionality is implemented in the code and tested in Wokwi. In a real system it could be connected to a vibration sensor proper isolated and installed near by the railway.
 
 ## Grafana
 
@@ -101,8 +102,8 @@ Example payload:
 } 
 ```
 
-Consumer recive the message and store the data in TimescaleDB.
-This steps need for fether anlaisis like:
+Consumer receive the message and store the data in TimescaleDB.
+This steps need for futher anlaysis like:
  - when there are more danger event? 
  - in which day?
  - in which station  
