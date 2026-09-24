@@ -4,14 +4,14 @@
 
 InfraredFoxMini is an edge computing prototype for detecting and monitoring objects entering railway risk zones.
 
-The system uses a Raspberry Pi Pico 2 W with infrared sensors to detect movement between SAFE, WARNING and DANGER zones. The Pico publishes zone changes through MQTT to a containerized backend, where events are stored in TimescaleDB and visualized in Grafana.
+The system uses a Raspberry Pi Pico 2 W with infrared break-beam sensors to detect movement between SAFE, WARNING and DANGER zones. The Pico publishes zone changes through MQTT to a containerized backend, where events are stored in TimescaleDB and visualized in Grafana.
 
 ## How to run
 
-The Raspberry Pi Pico must be connected to the same network as the MQTT broker during local testing.
-
 azure link: 
 http://68.210.186.123:3000/
+The Azure resource group and VM were removed after the demo to avoid additional costs, so the link is no longer active.
+
 
 `docker compose up -d` 
 
@@ -42,6 +42,8 @@ Pico 2 W
 - Potentiometer
 - 330 Ω resistor
 
+The system is designed to use IR break-beam sensors. During the final demo, push buttons were used as a sensor simulation/fallback, while the IR sensors had been tested separately.
+
 ## Zone Logic
 
 - SAFE: normal state
@@ -70,6 +72,8 @@ When a train detection event is active:
 
 `ATTENTION!`
 `TRAIN ARRIVING`
+
+The LCD functionality is implemented in the code and tested in Wokwi. In a real system it could be connected to a vibration sensor propper isoleted and installed near by the ralway.
 
 ## Grafana
 
@@ -112,9 +116,25 @@ Has been used for:
 - Grafana
 And for a easy deployment.
 
+## Azure Deployment
+
+The complete pipeline was deployed and tested on a Linux VM in Azure using Docker Compose.
+
+The deployed services were:
+
+- Mosquitto
+- Consumer
+- TimescaleDB
+- Grafana
+
+The Pico sent MQTT data directly to the Azure VM, and Grafana displayed the incoming data live.
+
+The Azure VM and resource group were removed after the demo to avoid additional costs.
+
+
 
 ## Authors 
 
 Alessandro
 Mona
-Mairan
+Marian
