@@ -4,8 +4,21 @@ time.sleep(0.1)
 from machine import Pin, PWM
 
 # Sensors
+# The system is designed for two IR break beam sensors 
+# GPIO 2 = Warning sensor 
+# GPIO 3 = Danger sensor 
+# For the classroom demo push buttons were connected to the same GPIO pins to simulate the sensor events and make the demo more reliable 
 IR_Warningsensor = Pin(2, Pin.IN, Pin.PULL_UP)
 IR_Dangersensor = Pin(3, Pin.IN, Pin.PULL_UP)
+
+# Real IR break-beam sensors used in the intended hardware setup:
+# IR_Warningsensor = Pin(2, Pin.IN, Pin.PULL_UP)
+# IR_Dangersensor = Pin(3, Pin.IN, Pin.PULL_UP)
+
+# Buttons used in the final demo as a sensor simulation / fallback.
+# The system is designed for two IR break-beam sensors.
+# For the final classroom demo, push buttons were connected to the same GPIO pins
+# to simulate the sensor events and make the demo more reliable.
 
 # LED
 green_led = Pin(9, Pin.OUT)
