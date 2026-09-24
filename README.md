@@ -104,8 +104,8 @@ Example payload:
 Consumer recive the message and store the data in TimescaleDB.
 This steps need for fether anlaisis like:
  - when there are more danger event? 
- - in wich day?
- - in wich station  
+ - in which day?
+ - in which station  
 
 ## Docker compose 
 
