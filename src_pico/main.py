@@ -46,10 +46,10 @@ buzzer.duty_u16(0)
 
 # Timing duration of zones
 starttime_dangerzone = None
-danger_duration = 0
+danger_duration = 0.0
 
 starttime_warningzone = None
-warning_duration = 0  # Changed name into warning for clarity
+warning_duration = 0.0  # Changed name into warning for clarity
 
 
 # Functions for BUZZER, ZONE CONTROL and MQTT publishing
@@ -59,7 +59,14 @@ def alarm(freq, duration, duty):  # LLM USAGE *
     buzzer.duty_u16(duty)
     time.sleep(duration)
     buzzer.duty_u16(0)
+def calculate_duration(start_time):
+    if start_time is None:
+        return 0.0
 
+    return time.ticks_diff(
+        time.ticks_ms(),
+        start_time
+    ) / 1000
 
 def set_zone(zone):
     global starttime_warningzone
@@ -96,18 +103,11 @@ def set_zone(zone):
         for i in range(4):
             alarm(1500,0.20, 5000)
             time.sleep(0.08)
-                    
-     
-
-    
-
-    
-    
+            
+            
 
 
-
-
-def publish_zone(zone, warning_duration=0, danger_duration=0):
+def publish_zone(zone, warning_duration=0.0, danger_duration=0.0):
     print("Publishing:", zone)
 
     publish_infraredfox_data(
@@ -146,8 +146,8 @@ while True:
 
         # SAFE -> WARNING
         if current_zone == "SAFE":
-            warning_duration = 0
-            danger_duration = 0
+            warning_duration = 0.0
+            danger_duration = 0.0
             current_zone = "WARNING"
 
             set_zone(current_zone)
@@ -160,12 +160,7 @@ while True:
 
         # WARNING -> SAFE
         elif current_zone == "WARNING":
-
-            warning_duration = time.ticks_diff(
-                time.ticks_ms(),
-                starttime_warningzone
-            ) / 1000
-
+            warning_duration = calculate_duration(starttime_warningzone)
             starttime_warningzone = None
 
             print(
@@ -194,13 +189,9 @@ while True:
     # WARNING <-> DANGER
     elif dangerzone_button.value() == 0:
 
-        # WARNING -> DANGER
+        
         if current_zone == "WARNING":
-
-            warning_duration = time.ticks_diff(
-                time.ticks_ms(),
-                starttime_warningzone
-            ) / 1000
+            warning_duration = calculate_duration(starttime_warningzone)
 
             starttime_warningzone = None
 
@@ -222,11 +213,7 @@ while True:
 
         # DANGER -> WARNING
         elif current_zone == "DANGER":
-
-            danger_duration = time.ticks_diff(
-                time.ticks_ms(),
-                starttime_dangerzone
-            ) / 1000
+            danger_duration = calculate_duration(starttime_dangerzone)
 
             starttime_dangerzone = None
 
