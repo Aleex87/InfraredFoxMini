@@ -1,162 +1,252 @@
 import time
-time.sleep(0.1) 
-
 from machine import Pin, PWM
+from wifi import connect_wifi
+from mqtt import connecting_mqtt, publish_infraredfox_data
+from display import show_ready, show_train_warning, button_pressed
 
+
+# Wifi and MQTT
+print("Connecting to Wifi please wait..")
+connect_wifi()
+print("Wifi successfully connected!")
+
+print("Connecting to MQTT please wait...")
+
+try:
+    mqtt_client = connecting_mqtt()
+    print("MQTT successfully connected!")
+except Exception as error:
+    print("MQTT connection failed:", error)
+    raise
 # Sensors
-# The system is designed for two IR break beam sensors 
-# GPIO 2 = Warning sensor 
-# GPIO 3 = Danger sensor 
-# For the classroom demo push buttons were connected to the same GPIO pins to simulate the sensor events and make the demo more reliable 
-IR_Warningsensor = Pin(2, Pin.IN, Pin.PULL_UP)
-IR_Dangersensor = Pin(3, Pin.IN, Pin.PULL_UP)
+# The system is designed for two IR break-beam sensors:
+# GPIO 2 = warning sensor
+# GPIO 3 = danger sensor
+#
+# For the final classroom demo, push buttons were connected to the same GPIO pins
+# to simulate the sensor events and make the demo more reliable.
 
-# LED
+# Inputs. Buttons will replace IR sensors
+warningzone_button = Pin(2, Pin.IN, Pin.PULL_UP)
+dangerzone_button = Pin(3, Pin.IN, Pin.PULL_UP)
+
+
+# Outputs LED
 green_led = Pin(9, Pin.OUT)
 warning_led = Pin(10, Pin.OUT)
 red_led = Pin(11, Pin.OUT)
 
-zone = "SAFE" # Default mode 
-object_in_zone = False
 
-# Buzzer *LLM USAGE*.In the following part i took assistance from LLM.
+# Buzzer
 buzzer = PWM(Pin(5))
-buzzer.freq(1000)
 buzzer.duty_u16(0)
 
 
-# Timing duration of zones 
-starttime_dangerzone = None 
+# Timing duration of zones
+starttime_dangerzone = None
 danger_duration = 0
 
-starttime_warningzone = None 
-zone_duration = 0
-
-# State of sensors 
-
-previouswarning_state = 1  # 1 = beam is clear 0 = beam is broken !
-previousDanger_state = 1  
+starttime_warningzone = None
+warning_duration = 0  # Changed name into warning for clarity
 
 
-# Direction of person/object : TOWARDS DANGER or TOWARDS SAFEZONE
-direction = None 
+# Functions for BUZZER, ZONE CONTROL and MQTT publishing
+
+def alarm(freq, duration, duty):  # LLM USAGE *
+    buzzer.freq(freq)
+    buzzer.duty_u16(duty)
+    time.sleep(duration)
+    buzzer.duty_u16(0)
 
 
-while True: 
+def set_zone(zone):
+    global starttime_warningzone
+    global starttime_dangerzone
 
-    # Reading sensor states 
+    print("ZONE:", zone)
 
-    current_danger = IR_Dangersensor.value()
-    current_warning = IR_Warningsensor.value()
-    # Create crossing events 
-    # Only when beam changes from 1 clear to 0 broken 
-    warningzone_crossed = previouswarning_state == 1 and current_warning == 0
-    dangerzone_crossed = previousDanger_state == 1 and current_danger == 0
-
-
-# SAFE TO WARNING 
-    if warningzone_crossed and zone == "SAFE":
-        direction = "TOWARDS_DANGER"
-        zone = "WARNING"
-
-
-# WARNING TO DANGER 
-    elif dangerzone_crossed and zone == "WARNING":
-        direction = "TOWARDS_DANGER"
-        zone = "DANGER"
-
- 
-  
-    # RETURNING LOGIC . Return to SAFE zone
-    # DANGER -> WARNING
-    elif dangerzone_crossed and zone == "DANGER":
-        direction = "TOWARDS_SAFE"
-        zone = "WARNING"
-
-# WARNING->SAFE
-    elif  warningzone_crossed and zone == "WARNING" and direction == "TOWARDS_SAFE":
-         zone = "SAFE"
-         direction = None 
-         
-    
-# Check if beam is broken
-
-    if previouswarning_state == 1 and current_warning == 0:
-        print("Warning sensor crossed !")
-
-    if previousDanger_state == 1 and current_danger == 0:
-        print("Danger sensor crossed!")
-
- # zone controls LED buzzer timer 
-    if zone == "DANGER":  # Danger must have highest priority
-        object_in_zone = True 
-        buzzer.duty_u16(5000) # buzzer activates 
-        
-        
-    # Timer starts
-        if starttime_dangerzone is None:
-            starttime_dangerzone = time.ticks_ms()
-            print("IMMEDIATE DANGER") 
-
-        green_led.value(0)
-        red_led.value(1)
-        warning_led.value(0)
-
-
-    elif zone == "WARNING": # 2nd priority but still high risk area
-        object_in_zone = True
-        buzzer.duty_u16(3000) # Lower sound
-       
-        if starttime_warningzone is None:
-            starttime_warningzone = time.ticks_ms() 
-            print("High risk ")
-
-        green_led.value(0)
-        warning_led.value(1) # Only this led will be on
-        red_led.value(0)
-
-    else:
-        
-        object_in_zone = False
-        zone = "SAFE"
-        buzzer.duty_u16(0)
-
+    if zone == "SAFE":
         green_led.value(1)
         warning_led.value(0)
         red_led.value(0)
+        buzzer.duty_u16(0)
 
+    elif zone == "WARNING":
+        if starttime_warningzone is None:
+            starttime_warningzone = time.ticks_ms()
 
-    if starttime_dangerzone is not None and zone != "DANGER":
-        danger_duration = time.ticks_diff(
-            time.ticks_ms(),
-            starttime_dangerzone
-        )
+        green_led.value(0)
+        warning_led.value(1)
+        red_led.value(0)
 
-        danger_duration = danger_duration / 1000
+        alarm(700, 0.20, 3000)
+        time.sleep(0.15)
+        alarm(700, 0.20, 3000)
 
-        print(
-            "Amount of time in danger zone",
-            danger_duration, "seconds")
+    # The danger-zone timer was missing, so it was added here.
+    elif zone == "DANGER":
+        if starttime_dangerzone is None:
+            starttime_dangerzone = time.ticks_ms()
+
+        green_led.value(0)
+        warning_led.value(0)
+        red_led.value(1)
+
+        for i in range(4):
+            alarm(1500,0.20, 5000)
+                    
+     
+
     
-        starttime_dangerzone = None
+
+    
+    
 
 
-    if starttime_warningzone is not None and zone != "WARNING":
-        zone_duration = time.ticks_diff(
-            time.ticks_ms(),
-            starttime_warningzone 
-        )
-
-        zone_duration = zone_duration / 1000
-
-        print("Amount of time in warning zone",
-               zone_duration, "seconds")
-
-        starttime_warningzone = None 
 
 
-    # Saving sensor values for next loop
-    previouswarning_state = current_warning
-    previousDanger_state = current_danger
+def publish_zone(zone, warning_duration=0, danger_duration=0):
+    print("Publishing:", zone)
 
-    time.sleep(0.1)
+    publish_infraredfox_data(
+        mqtt_client,
+        zone,
+        warning_duration,
+        danger_duration
+    )
+
+
+## Button control
+print("Button control started")
+
+current_zone = "SAFE"
+train_detection_active = False
+
+set_zone(current_zone)
+publish_zone(current_zone)
+show_ready()
+
+
+while True:
+
+    # LCD train detection
+    if button_pressed() and not train_detection_active:
+        show_train_warning()
+        train_detection_active = True
+
+    elif not button_pressed() and train_detection_active:
+        show_ready()
+        train_detection_active = False
+
+
+    # SAFE <-> WARNING
+    if warningzone_button.value() == 0:
+
+        # SAFE -> WARNING
+        if current_zone == "SAFE":
+            current_zone = "WARNING"
+
+            set_zone(current_zone)
+
+            publish_zone(
+                current_zone,
+                warning_duration,
+                danger_duration
+            )
+
+        # WARNING -> SAFE
+        elif current_zone == "WARNING":
+
+            warning_duration = time.ticks_diff(
+                time.ticks_ms(),
+                starttime_warningzone
+            ) / 1000
+
+            starttime_warningzone = None
+
+            print(
+                "Time in WARNING:",
+                warning_duration,
+                "seconds"
+            )
+
+            current_zone = "SAFE"
+
+            set_zone(current_zone)
+
+            publish_zone(
+                current_zone,
+                warning_duration,
+                danger_duration
+            )
+
+        # Wait until button is released
+        while warningzone_button.value() == 0:
+            time.sleep(0.05)
+
+        time.sleep(0.1)
+
+
+    # WARNING <-> DANGER
+    elif dangerzone_button.value() == 0:
+
+        # WARNING -> DANGER
+        if current_zone == "WARNING":
+
+            warning_duration = time.ticks_diff(
+                time.ticks_ms(),
+                starttime_warningzone
+            ) / 1000
+
+            starttime_warningzone = None
+
+            print(
+                "Time in WARNING:",
+                warning_duration,
+                "seconds"
+            )
+
+            current_zone = "DANGER"
+
+            set_zone(current_zone)
+
+            publish_zone(
+                current_zone,
+                warning_duration,
+                danger_duration
+            )
+
+        # DANGER -> WARNING
+        elif current_zone == "DANGER":
+
+            danger_duration = time.ticks_diff(
+                time.ticks_ms(),
+                starttime_dangerzone
+            ) / 1000
+
+            starttime_dangerzone = None
+
+            print(
+                "Time in DANGER:",
+                danger_duration,
+                "seconds"
+            )
+
+            current_zone = "WARNING"
+
+            set_zone(current_zone)
+
+            publish_zone(
+                current_zone,
+                warning_duration,
+                danger_duration
+            )
+
+        # Wait until button is released
+        while dangerzone_button.value() == 0:
+            time.sleep(0.05)
+
+        time.sleep(0.1)
+
+
+    time.sleep(0.05)
